@@ -6,18 +6,18 @@ import union from './union';
 
 /**
  * The base class for all adapters
- * 
+ *
  * Children must, at a minimum extend two methods:
- * 
+ *
  * <code>
  * <ul>
  *  <li>read: handle results from a `get`</li>
  *  <li>write: handle a `put` request</li>
  * </ul>
  * </code>
- * 
+ *
  * Additionally, the following methods can be overwritten:
- * 
+ *
  * <code>
  * <ul>
  *  <li>get</li>
@@ -25,12 +25,12 @@ import union from './union';
  *  <li>afterWrite</li>
  * </ul>
  * </code>
- * 
+ *
  * Here is the flow through the BaseAdapter for a `get` and `put`:
- * 
+ *
  * Gun.on('get') -> _read -> get -> _get [Adapter does work] -> read -> afterRead
  * Gun.on('put') -> _write -> write -> _put [Adapter does work] -> afterWrite
- * 
+ *
  * @class
  * @extends BaseExtension
  */
@@ -40,8 +40,8 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Build the adapter. This takes an object as its only parameter.
-     * 
-     * @param {object} adapter 
+     *
+     * @param {object} adapter
      */
     constructor(adapter) {
         super();
@@ -90,10 +90,10 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Bootstrap the adapter. Flint calls this method when the adapter is registered
-     * 
+     *
      * @instance
      * @public
-     * 
+     *
      * @param {Gun} Gun    The Gun constructor
      */
     bootstrap(Gun) {
@@ -105,7 +105,7 @@ export default class BaseAdapter extends BaseExtension {
         }
 
         var _this = this;
-        this.Gun.on('opt', function(context) {
+        this.Gun.on('create', function(context) {
             this.to.next(context);
             _this.opt(context);
 
@@ -126,15 +126,15 @@ export default class BaseAdapter extends BaseExtension {
 
         return this.Gun;
     }
-    
+
     /**
      * Handle Gun `opt` event
-     * 
+     *
      * @instance
      * @public
-     * 
-     * @param {object} context   The gun context firing the event 
-     * 
+     *
+     * @param {object} context   The gun context firing the event
+     *
      * @returns {void}
      */
     opt(context) {
@@ -144,13 +144,13 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Handle a read result from an adapter.
-     * 
+     *
      * @instance
      * @public
-     * 
+     *
      * @param {mixed} context   Results from adapter read
      * @param {done}  callback  Callback to call with err, results as params
-     * 
+     *
      * @returns {void}
      */
     read(results, done) {
@@ -159,13 +159,13 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Pass a write event to the adaper; formatting if necessary
-     * 
+     *
      * @public
      * @instance
-     * 
+     *
      * @param {object} delta    A Gun write-delta
      * @param {done}  callback  Callback to call with err (if any) as param
-     * 
+     *
      * @returns {void}
      */
     write(delta, done) {
@@ -174,11 +174,11 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Pass the results of a read request into Gun
-     * 
+     *
      * @param {string} dedupId  Dedup ID passed by Gun during read request
-     * @param {Error}  [err]    Error (if any) that occured during read   
+     * @param {Error}  [err]    Error (if any) that occured during read
      * @param {object} data     A node formatted in a reconizable format for Gun
-     * 
+     *
      * @returns {void}
      */
     afterRead(dedupId, err, data) {
@@ -192,17 +192,17 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Pass the results of a read request into Gun
-     * 
+     *
      * @public
      * @instance
-     * 
+     *
      * @param {string} dedupId  Dedup ID passed by Gun during read request
-     * @param {Error}  [err]    Error (if any) that occured during read   
-     * 
+     * @param {Error}  [err]    Error (if any) that occured during read
+     *
      * @returns {void}
      */
     afterWrite(dedupId, err) {
-        
+
         // Report whether it succeeded.
         this.context.on('in', {
             '@': dedupId,
@@ -214,7 +214,7 @@ export default class BaseAdapter extends BaseExtension {
     /**
      * @instance
      * @public
-     * 
+     *
      * @param {string}   key   The UUID for the node to retrieve
      * @param {string}  [field]   If supplied, get a single field; otherwise full node is requested
      * @param {callback} done  Callback after retrieval is finished
@@ -227,10 +227,10 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Handle Gun 'get' events
-     * 
+     *
      * @instance
      * @private
-     * 
+     *
      * @param  {Object} context - A gun request context.
      * @returns {void}
      */
@@ -258,7 +258,7 @@ export default class BaseAdapter extends BaseExtension {
                     this.afterRead(dedupId, err, null);
                 }
             } else {
-                
+
                 // Pass the result to child implementations
                 // Children should know how to handle results
                 // And return a valid GUN object
@@ -269,10 +269,10 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Handle Gun 'put' events
-     * 
+     *
      * @instance
      * @private
-     * 
+     *
      * @param {object} context  Gun write context
      */
     _write(context) {
@@ -290,12 +290,12 @@ export default class BaseAdapter extends BaseExtension {
     }
 
     /**
-     * Check the dedup hash to ensure that anything that was 
+     * Check the dedup hash to ensure that anything that was
      * just pulled from the adapter is passed back in as a write
-     * 
+     *
      * @instance
      * @private
-     * 
+     *
      * @param {string} dedupId  The request dedup
      * @return {boolean}        Whether or not the `PUT` linked to this dedupid should be written
      */
@@ -316,11 +316,11 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Every get should record its dedupId during retrieval in the hash.
-     * 
+     *
      * @instance
      * @private
-     * 
-     * @param {string} dedupId 
+     *
+     * @param {string} dedupId
      */
     _recordGet(dedupId) {
         if (!this.__dedupIds[dedupId]) {
